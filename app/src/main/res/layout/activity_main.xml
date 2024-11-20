@@ -27,16 +27,17 @@
                 android:layout_width="295dp"
                 android:layout_height="87dp"
                 android:ems="10"
+                android:hint="@string/enter_a_task"
+                android:importantForAutofill="no"
                 android:inputType="text"
-                android:onClick="clearText"
-                android:text="Enter A Task:" />
+                tools:ignore="SpeakableTextPresentCheck" />
 
             <Button
                 android:id="@+id/button_add"
-                android:layout_width="81dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Add" />
+                android:text="@string/add_task" />
 
         </LinearLayout>
 
@@ -44,9 +45,10 @@
             android:id="@+id/button_store"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Store" />
+            android:text="@string/store" />
 
         <ListView
+            android:id="@+id/taskList"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
