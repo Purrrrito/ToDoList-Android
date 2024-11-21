@@ -19,7 +19,7 @@
         <LinearLayout
             android:id="@+id/linearLayout"
             android:layout_width="409dp"
-            android:layout_height="65dp"
+            android:layout_height="107dp"
             android:orientation="horizontal">
 
             <EditText
@@ -32,20 +32,27 @@
                 android:inputType="text"
                 tools:ignore="SpeakableTextPresentCheck" />
 
-            <Button
-                android:id="@+id/button_add"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/add_task" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/button_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/add_task" />
+
+                <Button
+                    android:id="@+id/button_store"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/store" />
+
+            </LinearLayout>
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button_store"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/store" />
 
         <ListView
             android:id="@+id/taskList"

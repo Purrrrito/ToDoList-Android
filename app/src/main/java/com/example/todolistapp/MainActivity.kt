@@ -2,10 +2,14 @@ package com.example.todolistapp
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,8 +17,8 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
     private lateinit var taskList: ListView
-    private val tasks = ArrayList<String>()
-    private lateinit var adapter: ArrayAdapter<String>
+    private val tasks = mutableListOf<Task>()
+    private lateinit var adapter: TaskAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         val addButton = findViewById<Button>(R.id.button_add)
         val editText = findViewById<EditText>(R.id.editText_add_task)
         taskList = findViewById(R.id.taskList)
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, tasks)
+        adapter = TaskAdapter(this, tasks)
         taskList.adapter = adapter
 
         loadTasks()
@@ -39,28 +43,69 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-     private fun addTask(editText: EditText) {
+    private fun addTask(editText: EditText) {
         val taskText = editText.text.toString()
 
         if (taskText.isNotEmpty()) {
-            tasks.add(taskText)
+            tasks.add(Task(taskText, false))
             adapter.notifyDataSetChanged()
             saveTasks()
             editText.text.clear()
         }
     }
 
-    private fun saveTasks() {
-        val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+    fun saveTasks() {
+        val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE) // Use named preferences
         val editor = sharedPreferences.edit()
-        editor.putStringSet("tasks", tasks.toSet())
+        editor.putStringSet("tasks", tasks.map { "${it.text},${it.completed}" }.toSet())
         editor.apply()
     }
 
     private fun loadTasks() {
-        val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE) // Use same named preferences
         val savedTasks = sharedPreferences.getStringSet("tasks", setOf()) ?: setOf()
-        tasks.addAll(savedTasks)
+        tasks.clear()
+        savedTasks.forEach {
+            val taskData = it.split(",")
+            if (taskData.size == 2) {
+                tasks.add(Task(taskData[0], taskData[1].toBoolean()))
+            }
+        }
         adapter.notifyDataSetChanged()
+    }
+
+}
+
+
+
+data class Task(val text: String, var completed: Boolean)
+
+class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
+    ArrayAdapter<Task>(context, 0, tasks) {
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val task = getItem(position)
+        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.task_item, parent, false)
+
+        val taskText = view.findViewById<TextView>(R.id.task_text)
+        val taskButton = view.findViewById<Button>(R.id.task_button)
+
+        taskText.text = task?.text
+
+        taskButton.text = if (task?.completed == true) "Delete" else "Complete"
+
+        taskButton.setOnClickListener {
+            task?.let {
+                if (it.completed) {
+                    tasks.remove(task)
+                } else {
+                    it.completed = true
+                    taskButton.text = "Delete"
+                }
+                notifyDataSetChanged()
+                (context as? MainActivity)?.saveTasks()
+            }
+        }
+        return view
     }
 }
