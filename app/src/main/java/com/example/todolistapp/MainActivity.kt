@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -95,17 +96,40 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
         taskButton.text = if (task?.completed == true) "Delete" else "Complete"
 
         taskButton.setOnClickListener {
-            task?.let {
-                if (it.completed) {
-                    tasks.remove(task)
-                } else {
-                    it.completed = true
-                    taskButton.text = "Delete"
-                }
+            if (task?.completed == false) {
+                showCompletedConfirmationDialog(task, taskButton)
+            }
+            else {
+                tasks.remove(task)
                 notifyDataSetChanged()
                 (context as? MainActivity)?.saveTasks()
             }
         }
         return view
     }
+
+    private fun showCompletedConfirmationDialog(task: Task, taskButton: Button) {
+        // Build the AlertDialog
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Confirmation")
+        builder.setMessage("Have you completed: ${task?.text}")
+
+        builder.setPositiveButton("Yes") { dialog, _ ->
+            task.let {
+                it.completed = true
+                taskButton.text = "Delete"
+                notifyDataSetChanged()
+                (context as? MainActivity)?.saveTasks()
+                dialog.dismiss()
+            }
+        }
+
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        builder.create().show()
+
+    }
+
 }
