@@ -1,6 +1,7 @@
 package com.example.todolistapp
 
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -93,7 +94,14 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
 
         taskText.text = task?.text
 
-        taskButton.text = if (task?.completed == true) "Delete" else "Complete"
+        if (task?.completed == true) {
+            taskButton.text = context.getString(R.string.delete)
+            taskButton.setBackgroundColor(Color.RED)
+        }
+        else {
+            taskButton.text = context.getString(R.string.complete)
+            taskButton.setBackgroundColor(Color.GREEN)
+        }
 
         taskButton.setOnClickListener {
             if (task?.completed == false) {
@@ -112,12 +120,12 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
         // Build the AlertDialog
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Confirmation")
-        builder.setMessage("Have you completed: ${task?.text}")
+        builder.setMessage("Have you completed: ${task.text}")
 
         builder.setPositiveButton("Yes") { dialog, _ ->
             task.let {
                 it.completed = true
-                taskButton.text = "Delete"
+                taskButton.text = context.getString(R.string.delete)
                 notifyDataSetChanged()
                 (context as? MainActivity)?.saveTasks()
                 dialog.dismiss()

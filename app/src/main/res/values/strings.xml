@@ -3,4 +3,6 @@
     <string name="enter_a_task">Enter A Task:</string>
     <string name="add_task">Add Task</string>
     <string name="store">Store</string>
+    <string name="delete">Delete</string>
+    <string name="complete">Complete</string>
 </resources>
