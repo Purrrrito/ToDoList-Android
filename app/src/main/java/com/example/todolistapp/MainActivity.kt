@@ -16,11 +16,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
     private lateinit var taskList: ListView
     private val tasks = mutableListOf<Task>()
     private lateinit var adapter: TaskAdapter
+    var points: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,22 +34,34 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Initialize UI elements
         val addButton = findViewById<Button>(R.id.button_add)
         val editText = findViewById<EditText>(R.id.editText_add_task)
+        val pointsTextView: TextView = findViewById(R.id.textView_points)
         taskList = findViewById(R.id.taskList)
-        adapter = TaskAdapter(this, tasks)
+
+        // Set up the adapter for the task list
+        adapter = TaskAdapter(this, tasks) { updatedPoints ->
+            points = updatedPoints
+            pointsTextView.text = "Points: $points"
+            saveTasks()
+        }
         taskList.adapter = adapter
 
+        // Loads the saved tasks
         loadTasks()
 
-        addButton.setOnClickListener {
-            addTask(editText)
-        }
+        // On click listener for Add Task
+        addButton.setOnClickListener { addTask(editText) }
     }
 
+
+    /**
+     * Adds the new task to the list.
+     * Clears the input field after adding.
+     */
     private fun addTask(editText: EditText) {
         val taskText = editText.text.toString()
-
         if (taskText.isNotEmpty()) {
             tasks.add(Task(taskText, false))
             adapter.notifyDataSetChanged()
@@ -56,34 +70,58 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Saves the tasks and the points to shared preferences.
+     */
     fun saveTasks() {
         val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE) // Use named preferences
         val editor = sharedPreferences.edit()
-        editor.putStringSet("tasks", tasks.map { "${it.text},${it.completed}" }.toSet())
+
+        val taskSet = tasks.map { "${it.text},${it.completed}" }.toSet()
+        editor.putStringSet("tasks", taskSet)
+        editor.putInt("points", points)
         editor.apply()
     }
 
+    /**
+     * Loads tasks and points from shared preferences.
+     */
     private fun loadTasks() {
-        val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE) // Use same named preferences
-        val savedTasks = sharedPreferences.getStringSet("tasks", setOf()) ?: setOf()
+        val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        val savedTasks = sharedPreferences.getStringSet("tasks", emptySet()) ?: emptySet()
+        points = sharedPreferences.getInt("points", 0)
+
         tasks.clear()
-        savedTasks.forEach {
-            val taskData = it.split(",")
+        savedTasks.forEach { taskString ->
+            val taskData = taskString.split(",")
             if (taskData.size == 2) {
                 tasks.add(Task(taskData[0], taskData[1].toBoolean()))
             }
         }
+
+        findViewById<TextView>(R.id.textView_points).text = "Points: $points"
         adapter.notifyDataSetChanged()
     }
 
 }
 
 
-
+/**
+ * Data class that represents a task
+ * @property text The name of the task.
+ * @property completed Whether the task is completed or not.
+ */
 data class Task(val text: String, var completed: Boolean)
 
-class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
-    ArrayAdapter<Task>(context, 0, tasks) {
+
+/**
+ * Customer adapter for managing the tasks in the ListView.
+ */
+class TaskAdapter(
+    context: Context,
+    private val tasks: MutableList<Task>,
+    private val onPointsUpdated: (Int) -> Unit
+) : ArrayAdapter<Task>(context, 0, tasks) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val task = getItem(position)
@@ -93,15 +131,7 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
         val taskButton = view.findViewById<Button>(R.id.task_button)
 
         taskText.text = task?.text
-
-        if (task?.completed == true) {
-            taskButton.text = context.getString(R.string.delete)
-            taskButton.setBackgroundColor(Color.RED)
-        }
-        else {
-            taskButton.text = context.getString(R.string.complete)
-            taskButton.setBackgroundColor(Color.GREEN)
-        }
+        updateTaskButton(task, taskButton)
 
         taskButton.setOnClickListener {
             if (task?.completed == false) {
@@ -116,8 +146,24 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
         return view
     }
 
+    /**
+     * Updates the appearance of the task button based on its state.
+     */
+    private fun updateTaskButton(task: Task?, button: Button) {
+        if (task?.completed == true) {
+            button.text = context.getString(R.string.delete)
+            button.setBackgroundColor(Color.RED)
+        }
+        else {
+            button.text = context.getString(R.string.complete)
+            button.setBackgroundColor(Color.GREEN)
+        }
+    }
+
+    /**
+     * Displays a confirmation dialog when marking a task as completed.
+     */
     private fun showCompletedConfirmationDialog(task: Task, taskButton: Button) {
-        // Build the AlertDialog
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Confirmation")
         builder.setMessage("Have you completed: ${task.text}")
@@ -127,7 +173,7 @@ class TaskAdapter(context: Context, private val tasks: MutableList<Task>) :
                 it.completed = true
                 taskButton.text = context.getString(R.string.delete)
                 notifyDataSetChanged()
-                (context as? MainActivity)?.saveTasks()
+                onPointsUpdated((context as MainActivity).points + 10)
                 dialog.dismiss()
             }
         }
