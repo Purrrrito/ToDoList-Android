@@ -63,6 +63,12 @@ class MainActivity : AppCompatActivity() {
         addButton.setOnClickListener { addTask(editText) }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        points =  sharedPreferences.getInt("points", 0)
+        findViewById<TextView>(R.id.textView_points).text = "Points: $points"
+    }
 
     /**
      * Adds the new task to the list.
