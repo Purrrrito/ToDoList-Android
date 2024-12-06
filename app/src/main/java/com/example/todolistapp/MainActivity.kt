@@ -1,6 +1,7 @@
 package com.example.todolistapp
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         // Initialize UI elements
         val addButton = findViewById<Button>(R.id.button_add)
         val editText = findViewById<EditText>(R.id.editText_add_task)
+        val storeButton = findViewById<Button>(R.id.button_store)
         val pointsTextView: TextView = findViewById(R.id.textView_points)
         taskList = findViewById(R.id.taskList)
 
@@ -50,6 +52,12 @@ class MainActivity : AppCompatActivity() {
 
         // Loads the saved tasks
         loadTasks()
+
+        // On click listener to open Store page
+        storeButton.setOnClickListener {
+            val intent = Intent(this, StoreActivity::class.java)
+            startActivity(intent)
+        }
 
         // On click listener for Add Task
         addButton.setOnClickListener { addTask(editText) }
