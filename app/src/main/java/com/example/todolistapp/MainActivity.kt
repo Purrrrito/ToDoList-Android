@@ -63,11 +63,22 @@ class MainActivity : AppCompatActivity() {
         addButton.setOnClickListener { addTask(editText) }
     }
 
+    // Loads points to match Main and Store
     override fun onResume() {
         super.onResume()
         val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         points =  sharedPreferences.getInt("points", 0)
         findViewById<TextView>(R.id.textView_points).text = "Points: $points"
+
+        val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
+        val selectedItem = storePreferences.getString("selectedItem", null)
+        val selectedColor = when (selectedItem) {
+            "Red" -> Color.RED
+            "Blue" -> Color.BLUE
+            "Green" -> Color.GREEN
+            else -> Color.WHITE
+        }
+        findViewById<View>(R.id.main).setBackgroundColor(selectedColor)
     }
 
     /**

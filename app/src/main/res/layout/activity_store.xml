@@ -27,9 +27,11 @@
             android:id="@+id/button_back"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="#5252D9"
             android:text="Back" />
 
         <ListView
+            android:id="@+id/storeList"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>

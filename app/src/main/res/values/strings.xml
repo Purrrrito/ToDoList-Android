@@ -5,4 +5,7 @@
     <string name="store">Store</string>
     <string name="delete">Delete</string>
     <string name="complete">Complete</string>
+    <string name="purchase">Purchase</string>
+    <string name="selected">Selected</string>
+    <string name="select">Select</string>
 </resources>
