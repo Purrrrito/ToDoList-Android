@@ -91,8 +91,9 @@ class StoreActivity : AppCompatActivity() {
     // Loads points to match Main and Store
     override fun onResume() {
         super.onResume()
+
         val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
-        val points = sharedPreferences.getInt("points", 0)
+        points = sharedPreferences.getInt("points", 0)
         findViewById<TextView>(R.id.textView_points).text = "Points: $points"
 
         val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
@@ -160,17 +161,26 @@ class StoreItemAdapter(
     }
 
     private fun purchaseItem(item: StoreItem, button: Button) {
-        val activity = context as StoreActivity
-        if (activity.points >= 50) { // Example cost
+        val sharedPreferences = context.getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        val currentPoints = sharedPreferences.getInt("points", 0)
+
+        if (currentPoints >= 50) { // Example cost
             item.purchased = true
-            activity.points -= 50
-            onPointsUpdated(activity.points)
             notifyDataSetChanged()
+
+            val updatedPoints = currentPoints - 50
+            sharedPreferences.edit().putInt("points", updatedPoints).apply()
+
+            (context as? StoreActivity)?.apply {
+                points = updatedPoints
+                saveStoreData()
+                onPointsUpdated(updatedPoints)
+            }
         } else {
             AlertDialog.Builder(context)
                 .setTitle("Insufficient Points")
-                .setMessage("You don't have enough points to purchase ${item.colorName}.")
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .setMessage("You need more points to purchase this item.")
+                .setPositiveButton("OK", null)
                 .show()
         }
     }
@@ -179,6 +189,7 @@ class StoreItemAdapter(
         items.forEach { it.selected = false }
         item.selected = true
         notifyDataSetChanged()
+
         val sharedPreferences = context.getSharedPreferences("store", Context.MODE_PRIVATE)
         sharedPreferences.edit().putString("selectedItem", item.colorName).apply()
 
