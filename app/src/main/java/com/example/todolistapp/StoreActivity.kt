@@ -1,7 +1,6 @@
 package com.example.todolistapp
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -45,7 +44,7 @@ class StoreActivity : AppCompatActivity() {
         // Set up adapter
         adapter = StoreItemAdapter(this, storeItems) { updatedPoints ->
             points = updatedPoints
-            pointsTextView.text = "Points: $points"
+            pointsTextView.text = getString(R.string.points_label, points)
             saveStoreData()
         }
         storeList.adapter = adapter
@@ -68,10 +67,12 @@ class StoreActivity : AppCompatActivity() {
 
         storeItems.clear()
         val colors = listOf(
-            StoreItem("Red", Color.RED, purchasedItems.contains("Red"), selectedItem == "Red"),
-            StoreItem("Blue", Color.BLUE, purchasedItems.contains("Blue"), selectedItem == "Blue"),
-            StoreItem("Green", Color.GREEN, purchasedItems.contains("Green"), selectedItem == "Green")
-        )
+            StoreItem("Pastel Pink", Color.parseColor("#FFB6C1"), purchasedItems.contains("Pastel Pink"), selectedItem == "Pastel Pink", 40),
+            StoreItem("Light Sky Blue", Color.parseColor("#87CEFA"), purchasedItems.contains("Light Sky Blue"), selectedItem == "Light Sky Blue", 50),
+            StoreItem("Mint Green", Color.parseColor("#98FF98"), purchasedItems.contains("Mint Green"), selectedItem == "Mint Green", 60),
+            StoreItem("Lavender", Color.parseColor("#E6E6FA"), purchasedItems.contains("Lavender"), selectedItem == "Lavender", 70),
+            StoreItem("Peach", Color.parseColor("#FFDAB9"), purchasedItems.contains("Peach"), selectedItem == "Peach", 80),
+            )
         storeItems.addAll(colors)
     }
 
@@ -94,14 +95,16 @@ class StoreActivity : AppCompatActivity() {
 
         val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         points = sharedPreferences.getInt("points", 0)
-        findViewById<TextView>(R.id.textView_points).text = "Points: $points"
+        findViewById<TextView>(R.id.textView_points).text = getString(R.string.points_label, points)
 
         val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
         val selectedItem = storePreferences.getString("selectedItem", null)
         val selectedColor = when (selectedItem) {
-            "Red" -> Color.RED
-            "Blue" -> Color.BLUE
-            "Green" -> Color.GREEN
+            "Pastel Pink" -> Color.parseColor("#FFB6C1")
+            "Light Sky Blue" -> Color.parseColor("#87CEFA")
+            "Mint Green" -> Color.parseColor("#98FF98")
+            "Lavender" -> Color.parseColor("#E6E6FA")
+            "Peach" -> Color.parseColor("#FFDAB9")
             else -> Color.WHITE
         }
         findViewById<View>(R.id.main).setBackgroundColor(selectedColor)
@@ -109,10 +112,11 @@ class StoreActivity : AppCompatActivity() {
 }
 
 data class StoreItem(
-    val colorName: String,   // Name of the color (e.g., "Red")
-    val colorCode: Int,     // Color value (e.g., Color.RED)
-    var purchased: Boolean, // If the item has been purchased
-    var selected: Boolean   // If the item is currently selected as background
+    val colorName: String,
+    val colorCode: Int,
+    var purchased: Boolean,
+    var selected: Boolean,
+    val price: Int
 )
 
 class StoreItemAdapter(
@@ -126,15 +130,17 @@ class StoreItemAdapter(
         val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.storeitem, parent, false)
 
         val itemName = view.findViewById<TextView>(R.id.item_name)
+        val itemPrice = view.findViewById<TextView>(R.id.item_price)
         val itemButton = view.findViewById<Button>(R.id.item_button)
 
         itemName.text = item?.colorName
+        itemPrice.text = context.getString(R.string.price_label, item?.price)
         updateButtonState(item, itemButton)
 
         itemButton.setOnClickListener {
             item?.let {
                 if (!it.purchased) {
-                    purchaseItem(it, itemButton)
+                    purchaseItem(it)
                 } else {
                     selectItem(it)
                 }
@@ -160,15 +166,15 @@ class StoreItemAdapter(
         }
     }
 
-    private fun purchaseItem(item: StoreItem, button: Button) {
+    private fun purchaseItem(item: StoreItem) {
         val sharedPreferences = context.getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val currentPoints = sharedPreferences.getInt("points", 0)
 
-        if (currentPoints >= 50) { // Example cost
+        if (currentPoints >= item.price) { // Example cost
             item.purchased = true
             notifyDataSetChanged()
 
-            val updatedPoints = currentPoints - 50
+            val updatedPoints = currentPoints - item.price
             sharedPreferences.edit().putInt("points", updatedPoints).apply()
 
             (context as? StoreActivity)?.apply {

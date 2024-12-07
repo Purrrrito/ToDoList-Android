@@ -8,4 +8,10 @@
     <string name="purchase">Purchase</string>
     <string name="selected">Selected</string>
     <string name="select">Select</string>
+    <string name="points_label">Points: %1$d</string>
+    <string name="price_label">Price: %1$d points</string>
+    <string name="insufficient_points_title">Insufficient Points</string>
+    <string name="insufficient_points_message">You need more points to purchase this item.</string>
+    <string name="ok">OK</string>
+    <string name="back">Back</string>
 </resources>

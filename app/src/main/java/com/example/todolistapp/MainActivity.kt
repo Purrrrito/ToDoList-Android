@@ -17,7 +17,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
     private lateinit var taskList: ListView
@@ -45,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         // Set up the adapter for the task list
         adapter = TaskAdapter(this, tasks) { updatedPoints ->
             points = updatedPoints
-            pointsTextView.text = "Points: $points"
+            pointsTextView.text = getString(R.string.points_label, points)
             saveTasks()
         }
         taskList.adapter = adapter
@@ -62,8 +61,9 @@ class MainActivity : AppCompatActivity() {
         // On click listener for Add Task
         addButton.setOnClickListener { addTask(editText) }
 
-        val resetButton = findViewById<Button>(R.id.resetButton)
-        resetButton.setOnClickListener { resetSharedPreferences() }
+        // Reset button used for testing
+/*        val resetButton = findViewById<Button>(R.id.resetButton)
+        resetButton.setOnClickListener { resetSharedPreferences() }*/
     }
 
     // Loads points to match Main and Store
@@ -71,20 +71,23 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val sharedPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         points =  sharedPreferences.getInt("points", 0)
-        findViewById<TextView>(R.id.textView_points).text = "Points: $points"
+        findViewById<TextView>(R.id.textView_points).text = getString(R.string.points_label, points)
 
         val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
         val selectedItem = storePreferences.getString("selectedItem", null)
         val selectedColor = when (selectedItem) {
-            "Red" -> Color.RED
-            "Blue" -> Color.BLUE
-            "Green" -> Color.GREEN
+            "Pastel Pink" -> Color.parseColor("#FFB6C1")
+            "Light Sky Blue" -> Color.parseColor("#87CEFA")
+            "Mint Green" -> Color.parseColor("#98FF98")
+            "Lavender" -> Color.parseColor("#E6E6FA")
+            "Peach" -> Color.parseColor("#FFDAB9")
             else -> Color.WHITE
         }
         findViewById<View>(R.id.main).setBackgroundColor(selectedColor)
     }
 
-    fun resetSharedPreferences() {
+    // Reset function used for testing
+/*    private fun resetSharedPreferences() {
         // Get all SharedPreferences used in your app
         val taskPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
         val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
@@ -92,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         // Clear the data in each SharedPreferences
         taskPreferences.edit().clear().apply()
         storePreferences.edit().clear().apply()
-    }
+    }*/
 
     /**
      * Adds the new task to the list.
@@ -137,7 +140,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<TextView>(R.id.textView_points).text = "Points: $points"
+        findViewById<TextView>(R.id.textView_points).text = getString(R.string.points_label, points)
         adapter.notifyDataSetChanged()
     }
 
