@@ -61,6 +61,9 @@ class MainActivity : AppCompatActivity() {
 
         // On click listener for Add Task
         addButton.setOnClickListener { addTask(editText) }
+
+        val resetButton = findViewById<Button>(R.id.resetButton)
+        resetButton.setOnClickListener { resetSharedPreferences() }
     }
 
     // Loads points to match Main and Store
@@ -79,6 +82,16 @@ class MainActivity : AppCompatActivity() {
             else -> Color.WHITE
         }
         findViewById<View>(R.id.main).setBackgroundColor(selectedColor)
+    }
+
+    fun resetSharedPreferences() {
+        // Get all SharedPreferences used in your app
+        val taskPreferences = getSharedPreferences("tasks", Context.MODE_PRIVATE)
+        val storePreferences = getSharedPreferences("store", Context.MODE_PRIVATE)
+
+        // Clear the data in each SharedPreferences
+        taskPreferences.edit().clear().apply()
+        storePreferences.edit().clear().apply()
     }
 
     /**

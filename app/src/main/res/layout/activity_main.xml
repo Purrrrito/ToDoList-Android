@@ -37,6 +37,13 @@
                 android:backgroundTint="#5252D9"
                 android:text="@string/store"
                 android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/resetButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Reset" />
         </LinearLayout>
 
         <LinearLayout
